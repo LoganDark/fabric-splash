@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "net.logandark.boilerplate.mixin",
+	"package": "net.logandark.splash.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [],
-	"client": ["AntiCoronavirus"],
+	"client": ["MixinSplashScreen"],
 	"server": [],
 	"injectors": {
 		"defaultRequire": 1

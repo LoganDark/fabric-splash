@@ -1,33 +1,41 @@
 {
 	"schemaVersion": 1,
-	"id": "fabric-boilerplate",
+	"id": "splash",
 	"version": "${version}",
 
-	"name": "Fabric Boilerplate",
-	"description": "Congrats, you made it work!",
+	"name": "Splash",
+	"description": "Change your splash screen colors",
 	"authors": ["LoganDark"],
 	"contact": {
-		"sources": "https://github.com/LoganDark/fabric-boilerplate",
-		"website": "https://github.com/LoganDark/fabric-boilerplate",
-		"issues": "https://github.com/LoganDark/fabric-boilerplate/issues"
+		"sources": "https://github.com/LoganDark/fabric-splash",
+		"website": "https://github.com/LoganDark/fabric-splash",
+		"issues": "https://github.com/LoganDark/fabric-splash/issues"
 	},
 
-	"custom": {},
+	"custom": {
+		"modmenu:clientsideOnly": true
+	},
 
 	"license": "GPLv3",
-	"icon": "assets/fabric-boilerplate/icon.png",
+	"icon": "assets/splash/icon.png",
 
 	"environment": "*",
 	"entrypoints": {
 		"main": [
 			{
 				"adapter": "kotlin",
-				"value": "net.logandark.boilerplate.FabricBoilerplate"
+				"value": "net.logandark.splash.Splash"
+			}
+		],
+		"modmenu": [
+			{
+				"adapter": "kotlin",
+				"value": "net.logandark.splash.SplashModMenu"
 			}
 		]
 	},
 
-	"mixins": ["fabric-boilerplate.mixins.json"],
+	"mixins": ["splash.mixins.json"],
 
 	"depends": {
 		"fabricloader": ">=0.8.8",

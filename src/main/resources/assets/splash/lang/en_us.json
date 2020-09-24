@@ -1,0 +1,9 @@
+{
+	"splash.configuration.title": "Splash Configuration",
+	"splash.configuration.fgBox": "Foreground Color",
+	"splash.configuration.bgBox": "Background Color",
+	"splash.configuration.save": "Save",
+	"splash.configuration.cancel": "Cancel",
+	"splash.configuration.preset.default": "Default",
+	"splash.configuration.preset.vanilla": "Vanilla"
+}
