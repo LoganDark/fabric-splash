@@ -65,7 +65,7 @@ public abstract class MixinSplashScreen {
 	private void splash_onBlend(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		RenderSystem.blendFuncSeparate(
 			GlStateManager.SrcFactor.SRC_ALPHA,
-			GlStateManager.DstFactor.ONE,
+			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
 			GlStateManager.SrcFactor.ZERO,
 			GlStateManager.DstFactor.ONE
 		);

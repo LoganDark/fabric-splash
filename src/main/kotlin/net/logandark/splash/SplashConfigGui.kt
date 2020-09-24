@@ -142,7 +142,7 @@ class SplashConfigGui(
 		RenderSystem.enableBlend()
 		RenderSystem.blendFuncSeparate(
 			GlStateManager.SrcFactor.SRC_ALPHA,
-			GlStateManager.DstFactor.ONE,
+			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
 			GlStateManager.SrcFactor.ZERO,
 			GlStateManager.DstFactor.ONE
 		)
