@@ -8,11 +8,14 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.math.MathHelper
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.GL_GREATER
 import org.lwjgl.opengl.GL11.GL_LINEAR
 import org.lwjgl.opengl.GL11.GL_TEXTURE_2D
 import org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER
 import org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER
+import org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S
+import org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -142,6 +145,9 @@ class SplashConfigGui(
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
+		val prevWrapS = GL11.glGetTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S)
+		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+
 		RenderSystem.enableBlend()
 		RenderSystem.blendColor(red, green, blue, 1F)
 		RenderSystem.blendFuncSeparate(
@@ -157,6 +163,8 @@ class SplashConfigGui(
 		RenderSystem.defaultBlendFunc()
 		RenderSystem.defaultAlphaFunc()
 		RenderSystem.disableBlend()
+
+		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, prevWrapS)
 
 		val yBarCenter = (height.toDouble() * 0.8325).toInt()
 		val progress = 0.9525
