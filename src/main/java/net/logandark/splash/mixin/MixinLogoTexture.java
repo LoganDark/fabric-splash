@@ -21,8 +21,9 @@ public abstract class MixinLogoTexture extends ResourceTexture {
 	 * Set up a copy of the logo image with premultiplied alpha so we can draw
 	 * that instead of the official texture (fixes the darkened edges)
 	 */
+	@SuppressWarnings("UnnecessaryQualifiedMemberReference")
 	@Redirect(
-		method = "loadTextureData",
+		method = "Lnet/minecraft/client/gui/screen/SplashScreen$LogoTexture;loadTextureData(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/texture/ResourceTexture$TextureData;",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/texture/NativeImage;read(Ljava/io/InputStream;)Lnet/minecraft/client/texture/NativeImage;",
