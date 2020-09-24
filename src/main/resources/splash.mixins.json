@@ -3,7 +3,7 @@
 	"package": "net.logandark.splash.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [],
-	"client": ["MixinSplashScreen"],
+	"client": ["MixinSplashScreen", "MixinLogoTexture"],
 	"server": [],
 	"injectors": {
 		"defaultRequire": 1,

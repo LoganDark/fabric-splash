@@ -2,6 +2,7 @@ package net.logandark.splash.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.logandark.splash.Splash;
 import net.logandark.splash.SplashConfig;
 import net.minecraft.client.gui.screen.SplashScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -44,31 +45,25 @@ public abstract class MixinSplashScreen {
 		)
 	)
 	private void splash_onRender(float ir, float ig, float ib, float alpha) {
-		//noinspection deprecation
-		RenderSystem.color4f(
-			((fgRgb >> 16) & 0xFF) / 255F,
-			((fgRgb >> 8) & 0xFF) / 255F,
-			(fgRgb & 0xFF) / 255F,
+		RenderSystem.blendColor(
+			((fgRgb >> 16) & 0xFF) / 255F * alpha,
+			((fgRgb >> 8) & 0xFF) / 255F * alpha,
+			(fgRgb & 0xFF) / 255F * alpha,
 			alpha
 		);
-	}
 
-	@Inject(
-		method = "render",
-		at = @At(
-			value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/systems/RenderSystem;alphaFunc(IF)V",
-			shift = At.Shift.BY,
-			by = 1
-		)
-	)
-	private void splash_onBlend(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		RenderSystem.blendFuncSeparate(
-			GlStateManager.SrcFactor.SRC_ALPHA,
+			GlStateManager.SrcFactor.CONSTANT_COLOR,
 			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
 			GlStateManager.SrcFactor.ZERO,
 			GlStateManager.DstFactor.ONE
 		);
+
+		//noinspection deprecation
+		RenderSystem.color4f(1f, 1f, 1f, alpha);
+
+		// switch to premultiplied logo
+		Splash.INSTANCE.bindLogoImage();
 	}
 
 	@Redirect(

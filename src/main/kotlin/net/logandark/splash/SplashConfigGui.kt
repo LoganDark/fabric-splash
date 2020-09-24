@@ -7,7 +7,6 @@ import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import org.lwjgl.opengl.GL11.GL_GREATER
 import kotlin.math.min
@@ -16,8 +15,6 @@ import kotlin.math.roundToInt
 class SplashConfigGui(
 	private val parent: Screen
 ) : Screen(TranslatableText("splash.configuration.title")) {
-	private val logoIdentifier = Identifier("textures/gui/title/mojangstudios.png")
-
 	private lateinit var fgField: HexTextFieldWidget
 	private lateinit var bgField: HexTextFieldWidget
 
@@ -138,16 +135,17 @@ class SplashConfigGui(
 		val blue = (fg and 0xFF).toFloat() / 255
 
 		// logo
-		client!!.textureManager.bindTexture(logoIdentifier)
+		Splash.bindLogoImage()
 		RenderSystem.enableBlend()
+		RenderSystem.blendColor(red, green, blue, 1F)
 		RenderSystem.blendFuncSeparate(
-			GlStateManager.SrcFactor.SRC_ALPHA,
+			GlStateManager.SrcFactor.CONSTANT_COLOR,
 			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
 			GlStateManager.SrcFactor.ZERO,
 			GlStateManager.DstFactor.ONE
 		)
 		RenderSystem.alphaFunc(GL_GREATER, 0.0f)
-		RenderSystem.color4f(red, green, blue, 1F)
+		RenderSystem.color4f(1F, 1F, 1F, 1F)
 		drawTexture(matrices, xCenter - hsizeX, yCenter - hsizeY, hsizeX, sizeY, -0.0625f, 0.0f, 120, 60, 120, 120)
 		drawTexture(matrices, xCenter, yCenter - hsizeY, hsizeX, sizeY, 0.0625f, 60.0f, 120, 60, 120, 120)
 		RenderSystem.defaultBlendFunc()
