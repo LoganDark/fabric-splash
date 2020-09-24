@@ -127,10 +127,10 @@ class SplashConfigGui(
 
 		val xCenter = width / 2
 		val yCenter = height / 2
-		val sizeY = min(width * 3 / 4, height) / 4
-		val hsizeY = sizeY / 2
-		val sizeX = sizeY * 4
+		val sizeX = min(width * 3 / 4, height)
 		val hsizeX = sizeX / 2
+		val sizeY = hsizeX / 2
+		val hsizeY = sizeY / 2
 
 		val fg = SplashConfig.fgColor
 		val red = (fg shr 16 and 0xFF).toFloat() / 255
