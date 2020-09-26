@@ -13,3 +13,5 @@ pluginManagement {
 		id "org.jetbrains.kotlin.jvm" version kotlin_version
 	}
 }
+
+rootProject.name = 'splash'
