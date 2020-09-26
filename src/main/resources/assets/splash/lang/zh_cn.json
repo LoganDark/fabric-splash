@@ -1,0 +1,10 @@
+  
+{
+	"splash.configuration.title": "色块配置 (Splash)",
+	"splash.configuration.fgBox": "前景色",
+	"splash.configuration.bgBox": "背景色",
+	"splash.configuration.save": "保存",
+	"splash.configuration.cancel": "取消",
+	"splash.configuration.preset.default": "默认",
+	"splash.configuration.preset.vanilla": "原版"
+}
