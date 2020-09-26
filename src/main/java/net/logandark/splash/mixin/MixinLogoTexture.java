@@ -46,14 +46,34 @@ public abstract class MixinLogoTexture extends ResourceTexture {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				int color = image.getPixelColor(x, y);
-				int alpha = color >> 24 & 0xFF;
+				int color = image.getPixelColor(Math.min(y + x, width), Math.min(x, height) % (height / 2));
+				int alpha = color >> 24; //& 0xFF;
 
 				// fix regular logo texture (not premultiplied)
 				//image.setPixelColor(x, y, color | 0xFFFFFF);
 
 				// premultiply for our custom logo texture
 				premultiplied.setPixelColor(x, y, alpha << 24 | alpha << 16 | alpha << 8 | alpha);
+			}
+		}
+
+		for (int y = 0; y < (height / 4); y++) {
+			for (int x = 0; x < width; x += 4) {
+				int lol = (int) Math.round(Math.random() * 0xFFFFFF) | 0xFF000000;
+				premultiplied.setPixelColor(x, y, lol);
+				premultiplied.setPixelColor(x + 1, y, lol);
+				premultiplied.setPixelColor(x + 2, y, lol);
+				premultiplied.setPixelColor(x + 3, y, lol);
+			}
+		}
+
+		for (int y = (height / 2); y < (height * 3 / 4); y++) {
+			for (int x = 0; x < width; x += 4) {
+				int lol = (int) Math.round(Math.random() * 0xFFFFFF) | 0xFF000000;
+				premultiplied.setPixelColor(x, y, lol);
+				premultiplied.setPixelColor(x + 1, y, lol);
+				premultiplied.setPixelColor(x + 2, y, lol);
+				premultiplied.setPixelColor(x + 3, y, lol);
 			}
 		}
 

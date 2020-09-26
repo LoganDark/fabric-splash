@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S
 import org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 class SplashConfigGui(
 	private val parent: Screen
@@ -33,6 +34,8 @@ class SplashConfigGui(
 
 	private var applying = false
 
+	private fun lol(until: Int) = Random.Default.nextInt(0, until)
+
 	override fun init() {
 		super.init()
 
@@ -46,7 +49,7 @@ class SplashConfigGui(
 		val buttonWidth = 50
 
 		bgField = HexTextFieldWidget(
-			textRenderer, padding, padding, fieldWidth, 20,
+			textRenderer, padding + lol(5), padding + lol(5), fieldWidth, 20,
 			TranslatableText("splash.configuration.bgBox")
 		)
 
@@ -56,7 +59,7 @@ class SplashConfigGui(
 			bgField.setValue(SplashConfig.bgColor)
 
 		fgField = HexTextFieldWidget(
-			textRenderer, width - padding - fieldWidth, padding, fieldWidth, 20,
+			textRenderer, width - padding - fieldWidth - lol(5), padding - lol(5), fieldWidth, 20,
 			TranslatableText("splash.configuration.fgBox")
 		)
 
@@ -77,7 +80,7 @@ class SplashConfigGui(
 			val (key, values) = presets[i]
 
 			addButton(ButtonWidget(
-				padding, padding + (20 + padding) * (i + 1), fieldWidth, 20, key,
+				padding + lol(5), padding + (20 + padding) * (i + 1) + lol(10), fieldWidth, 20, key,
 				ButtonWidget.PressAction {
 					fgField.setValue(values.first)
 					bgField.setValue(values.second)
@@ -86,7 +89,7 @@ class SplashConfigGui(
 		}
 
 		addButton(ButtonWidget(
-			halfWidth - halfPadding - buttonWidth, height - 20 - padding, buttonWidth, 20,
+			halfWidth - halfPadding - buttonWidth + lol(5), height - 20 - padding + lol(5), buttonWidth, 20,
 			TranslatableText("splash.configuration.cancel"),
 			ButtonWidget.PressAction {
 				onClose()
@@ -94,7 +97,7 @@ class SplashConfigGui(
 		))
 
 		addButton(ButtonWidget(
-			halfWidth + halfPadding, height - 20 - padding, buttonWidth, 20,
+			halfWidth + halfPadding + lol(5), height - 20 - padding + lol(5), buttonWidth, 20,
 			TranslatableText("splash.configuration.save"),
 			ButtonWidget.PressAction {
 				applying = true
@@ -115,6 +118,8 @@ class SplashConfigGui(
 
 		if (bgValue != null)
 			SplashConfig.bgColor = bgValue
+
+		init()
 
 		renderSplash(matrices)
 
@@ -158,8 +163,9 @@ class SplashConfigGui(
 		)
 		RenderSystem.alphaFunc(GL_GREATER, 0.0f)
 		RenderSystem.color4f(1F, 1F, 1F, 1F)
-		drawTexture(matrices, xCenter - hsizeX, yCenter - hsizeY, hsizeX, sizeY, -0.0625f, 0.0f, 120, 60, 120, 120)
-		drawTexture(matrices, xCenter, yCenter - hsizeY, hsizeX, sizeY, 0.0625f, 60.0f, 120, 60, 120, 120)
+
+		drawTexture(matrices, xCenter - hsizeX + lol(10), yCenter - hsizeY + lol(10), hsizeX + lol(10), sizeY + lol(10), -0.0625f, 0.0f, 120, 60, 120, 120)
+		drawTexture(matrices, xCenter + lol(10), yCenter - hsizeY + lol(10), hsizeX + lol(10), sizeY + lol(10), 0.0625f, 60.0f, 120, 60, 120, 120)
 		RenderSystem.defaultBlendFunc()
 		RenderSystem.defaultAlphaFunc()
 		RenderSystem.disableBlend()
@@ -183,11 +189,11 @@ class SplashConfigGui(
 	) {
 		val progressPixels = MathHelper.ceil((x2 - x1 - 2) * progress)
 		val color = (alpha * 255).roundToInt() shl 24 or SplashConfig.fgColor
-		fill(matrices, x1 + 1, y1, x2 - 1, y1 + 1, color)
-		fill(matrices, x1 + 1, y2, x2 - 1, y2 - 1, color)
-		fill(matrices, x1, y1, x1 + 1, y2, color)
-		fill(matrices, x2, y1, x2 - 1, y2, color)
-		fill(matrices, x1 + 2, y1 + 2, x1 + progressPixels, y2 - 2, color)
+		fill(matrices, x1 + 1 - lol(500), y1, x2 - 1, y1 + 1, color)
+		fill(matrices, x1 + 1 - lol(500), y2, x2 - 1, y2 - 1, color)
+		fill(matrices, x1 - lol(500), y1, x1 + 1, y2, color)
+		fill(matrices, x2 - lol(500), y1, x2 - 1, y2, color)
+		fill(matrices, x1 + 2 - lol(500), y1 + 2, x1 + progressPixels, y2 - 2, color)
 	}
 
 	override fun onClose() {

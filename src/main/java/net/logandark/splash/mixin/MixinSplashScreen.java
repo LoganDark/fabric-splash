@@ -14,8 +14,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -119,5 +123,44 @@ public abstract class MixinSplashScreen {
 	)
 	private int splash_onGetArgb(int a, int r, int g, int b) {
 		return (a << 24) | fgRgb;
+	}
+
+	@ModifyArgs(
+		method = "render",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/gui/screen/SplashScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIFFIIII)V"
+		)
+	)
+	private void lol(Args args) {
+		int[] ints = new int[]{
+			args.get(1),
+			args.get(2),
+			args.get(3),
+			args.get(4)
+		};
+
+		ints[0] += new Random().nextInt(10);
+		ints[1] += new Random().nextInt(10);
+		ints[2] += new Random().nextInt(10);
+		ints[3] += new Random().nextInt(10);
+
+		args.set(1, ints[0]);
+		args.set(2, ints[1]);
+		args.set(3, ints[2]);
+		args.set(4, ints[3]);
+	}
+
+	@ModifyArgs(
+		method = "renderProgressBar",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/gui/screen/SplashScreen;fill(Lnet/minecraft/client/util/math/MatrixStack;IIIII)V"
+		)
+	)
+	private void lol2(Args args) {
+		args.set(1, (int) args.get(1) - new Random().nextInt(500));
+		//args.set(2, (int) args.get(2) - new Random().nextInt(50));
+		//args.set(4, (int) args.get(4) + new Random().nextInt(50));
 	}
 }
