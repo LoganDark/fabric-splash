@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="fabric-splash.main" target="1.8" />
+      <module name="fabric-splash.test" target="1.8" />
       <module name="ld-config.main" target="1.8" />
       <module name="ld-config.test" target="1.8" />
     </bytecodeTargetLevel>
