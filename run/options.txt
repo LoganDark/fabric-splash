@@ -33,7 +33,7 @@ graphicsMode:2
 ao:2
 biomeBlendRadius:2
 renderClouds:true
-resourcePacks:[]
+resourcePacks:["fabric/fabric-resource-loader-v0","fabric/modmenu","fabric/fabricloader","fabric/fabric-language-kotlin","fabric/splash"]
 incompatibleResourcePacks:[]
 lastServer:
 lang:en_us

@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.math.MathHelper
+import org.lwjgl.glfw.GLFW.GLFW_KEY_GRAVE_ACCENT
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.GL_GREATER
 import org.lwjgl.opengl.GL11.GL_LINEAR
@@ -32,6 +33,8 @@ class SplashConfigGui(
 	private var fgString: String? = null
 
 	private var applying = false
+
+	private var buttonsShown = true
 
 	override fun init() {
 		super.init()
@@ -118,7 +121,8 @@ class SplashConfigGui(
 
 		renderSplash(matrices)
 
-		super.render(matrices, mouseX, mouseY, delta)
+		if (buttonsShown)
+			super.render(matrices, mouseX, mouseY, delta)
 	}
 
 	@Suppress("DEPRECATION")
@@ -199,5 +203,14 @@ class SplashConfigGui(
 		}
 
 		client!!.openScreen(parent)
+	}
+
+	override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+		return if (keyCode == GLFW_KEY_GRAVE_ACCENT) {
+			buttonsShown = !buttonsShown
+			true
+		} else {
+			super.keyPressed(keyCode, scanCode, modifiers)
+		}
 	}
 }
