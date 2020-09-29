@@ -24,7 +24,6 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	include "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 
 	modImplementation(fabricApi.module('fabric-resource-loader-v0', project.fabric_version))
 	modImplementation('io.github.prospector:modmenu:1.14.6+build.31') {
