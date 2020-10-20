@@ -1,0 +1,9 @@
+{
+	"splash.configuration.title": "Splash (Başlangıç) Ayarları",
+	"splash.configuration.fgBox": "Önplan Rengi",
+	"splash.configuration.bgBox": "Arkaplan Rengi",
+	"splash.configuration.save": "Kaydet",
+	"splash.configuration.cancel": "İptal",
+	"splash.configuration.preset.default": "Varsayılan",
+	"splash.configuration.preset.vanilla": "Vanilla"
+}
