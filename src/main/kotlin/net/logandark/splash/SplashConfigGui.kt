@@ -78,7 +78,7 @@ class SplashConfigGui(
 
 		fieldBarBorder = HexTextFieldWidget(
 			textRenderer, padding, padding * 5 + 80, fieldWidth, 20,
-			TranslatableText("splash.configuration.bgBox")
+			TranslatableText("splash.configuration.barBorderBox")
 		)
 
 		if (stringBarBorder != null)
@@ -88,7 +88,7 @@ class SplashConfigGui(
 
 		fieldBarBg = HexTextFieldWidget(
 			textRenderer, padding, padding * 6 + 100, fieldWidth, 20,
-			TranslatableText("splash.configuration.bgBox")
+			TranslatableText("splash.configuration.barBgBox")
 		)
 
 		if (stringBarBg != null)
@@ -98,7 +98,7 @@ class SplashConfigGui(
 
 		fieldBarFg = HexTextFieldWidget(
 			textRenderer, padding, padding * 7 + 120, fieldWidth, 20,
-			TranslatableText("splash.configuration.bgBox")
+			TranslatableText("splash.configuration.barFgBox")
 		)
 
 		if (stringBarFg != null)
