@@ -18,19 +18,27 @@ import org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER
 import org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S
 import org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 class SplashConfigGui(
 	private val parent: Screen
 ) : Screen(TranslatableText("splash.configuration.title")) {
-	private lateinit var fgField: HexTextFieldWidget
-	private lateinit var bgField: HexTextFieldWidget
+	private lateinit var fieldBackground: HexTextFieldWidget
+	private lateinit var fieldLogo: HexTextFieldWidget
+	private lateinit var fieldBarBorder: HexTextFieldWidget
+	private lateinit var fieldBarBg: HexTextFieldWidget
+	private lateinit var fieldBarFg: HexTextFieldWidget
 
-	private val fgStart = SplashConfig.fgColor
-	private val bgStart = SplashConfig.bgColor
+	private val colorBackgroundStart = SplashConfig.colorBackground
+	private val colorLogoStart = SplashConfig.colorLogo
+	private val colorBarBorderStart = SplashConfig.colorBarBorder
+	private val colorBarBgStart = SplashConfig.colorBarBg
+	private val colorBarFgStart = SplashConfig.colorBarFg
 
-	private var bgString: String? = null
-	private var fgString: String? = null
+	private var stringLogo: String? = null
+	private var stringBackground: String? = null
+	private var stringBarBorder: String? = null
+	private var stringBarBg: String? = null
+	private var stringBarFg: String? = null
 
 	private var applying = false
 
@@ -48,28 +56,61 @@ class SplashConfigGui(
 		val fieldWidth = 44
 		val buttonWidth = 50
 
-		bgField = HexTextFieldWidget(
-			textRenderer, padding, padding, fieldWidth, 20,
-			TranslatableText("splash.configuration.bgBox")
-		)
-
-		if (bgString != null)
-			bgField.text = bgString
-		else
-			bgField.setValue(SplashConfig.bgColor)
-
-		fgField = HexTextFieldWidget(
+		fieldLogo = HexTextFieldWidget(
 			textRenderer, width - padding - fieldWidth, padding, fieldWidth, 20,
 			TranslatableText("splash.configuration.fgBox")
 		)
 
-		if (fgString != null)
-			fgField.text = fgString
+		if (stringLogo != null)
+			fieldLogo.text = stringLogo
 		else
-			fgField.setValue(SplashConfig.fgColor)
+			fieldLogo.setValue(SplashConfig.colorLogo)
 
-		addButton(bgField)
-		addButton(fgField)
+		fieldBackground = HexTextFieldWidget(
+			textRenderer, padding, padding, fieldWidth, 20,
+			TranslatableText("splash.configuration.bgBox")
+		)
+
+		if (stringBackground != null)
+			fieldBackground.text = stringBackground
+		else
+			fieldBackground.setValue(SplashConfig.colorBackground)
+
+		fieldBarBorder = HexTextFieldWidget(
+			textRenderer, padding, padding * 5 + 80, fieldWidth, 20,
+			TranslatableText("splash.configuration.bgBox")
+		)
+
+		if (stringBarBorder != null)
+			fieldBarBorder.text = stringBarBorder
+		else
+			fieldBarBorder.setValue(SplashConfig.colorBarBorder)
+
+		fieldBarBg = HexTextFieldWidget(
+			textRenderer, padding, padding * 6 + 100, fieldWidth, 20,
+			TranslatableText("splash.configuration.bgBox")
+		)
+
+		if (stringBarBg != null)
+			fieldBarBg.text = stringBarBg
+		else
+			fieldBarBg.setValue(SplashConfig.colorBarBg)
+
+		fieldBarFg = HexTextFieldWidget(
+			textRenderer, padding, padding * 7 + 120, fieldWidth, 20,
+			TranslatableText("splash.configuration.bgBox")
+		)
+
+		if (stringBarFg != null)
+			fieldBarFg.text = stringBarFg
+		else
+			fieldBarFg.setValue(SplashConfig.colorBarFg)
+
+		addButton(fieldLogo)
+		addButton(fieldBackground)
+		addButton(fieldBarBorder)
+		addButton(fieldBarBg)
+		addButton(fieldBarFg)
 
 		val presets = listOf<Pair<Text, Pair<Int, Int>>>(
 			TranslatableText("splash.configuration.preset.default") to (SplashConfig.defaultFg to SplashConfig.defaultBg),
@@ -82,8 +123,11 @@ class SplashConfigGui(
 			addButton(ButtonWidget(
 				padding, padding + (20 + padding) * (i + 1), fieldWidth, 20, key,
 				ButtonWidget.PressAction {
-					fgField.setValue(values.first)
-					bgField.setValue(values.second)
+					fieldLogo.setValue(values.first)
+					fieldBackground.setValue(values.second)
+					fieldBarBorder.setValue(values.first)
+					fieldBarBg.setValue(values.second)
+					fieldBarFg.setValue(values.first)
 				}
 			))
 		}
@@ -107,17 +151,25 @@ class SplashConfigGui(
 	}
 
 	override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-		fgString = fgField.text
-		bgString = bgField.text
+		stringLogo = fieldLogo.text
+		stringBackground = fieldBackground.text
 
-		val fgValue = fgField.getValue()
-		val bgValue = bgField.getValue()
+		val valueBackground = fieldBackground.getValue()
+		val valueLogo = fieldLogo.getValue()
+		val valueBarBorder = fieldBarBorder.getValue()
+		val valueBarBg = fieldBarBg.getValue()
+		val valueBarFg = fieldBarFg.getValue()
 
-		if (fgValue != null)
-			SplashConfig.fgColor = fgValue
-
-		if (bgValue != null)
-			SplashConfig.bgColor = bgValue
+		if (valueBackground != null)
+			SplashConfig.colorBackground = valueBackground
+		if (valueLogo != null)
+			SplashConfig.colorLogo = valueLogo
+		if (valueBarBorder != null)
+			SplashConfig.colorBarBorder = valueBarBorder
+		if (valueBarBg != null)
+			SplashConfig.colorBarBg = valueBarBg
+		if (valueBarFg != null)
+			SplashConfig.colorBarFg = valueBarFg
 
 		renderSplash(matrices)
 
@@ -131,7 +183,7 @@ class SplashConfigGui(
 		val height = client!!.window.scaledHeight
 
 		// background color
-		fill(matrices, 0, 0, width, height, SplashConfig.bgColorArgb)
+		fill(matrices, 0, 0, width, height, SplashConfig.colorBackgroundArgb)
 
 		val xCenter = width / 2
 		val yCenter = height / 2
@@ -140,7 +192,7 @@ class SplashConfigGui(
 		val sizeY = hsizeX / 2
 		val hsizeY = sizeY / 2
 
-		val fg = SplashConfig.fgColor
+		val fg = SplashConfig.colorLogo
 		val red = (fg shr 16 and 0xFF).toFloat() / 255
 		val green = (fg shr 8 and 0xFF).toFloat() / 255
 		val blue = (fg and 0xFF).toFloat() / 255
@@ -186,20 +238,30 @@ class SplashConfigGui(
 		progress: Double
 	) {
 		val progressPixels = MathHelper.ceil((x2 - x1 - 2) * progress)
-		val color = (alpha * 255).roundToInt() shl 24 or SplashConfig.fgColor
-		fill(matrices, x1 + 1, y1, x2 - 1, y1 + 1, color)
-		fill(matrices, x1 + 1, y2, x2 - 1, y2 - 1, color)
-		fill(matrices, x1, y1, x1 + 1, y2, color)
-		fill(matrices, x2, y1, x2 - 1, y2, color)
-		fill(matrices, x1 + 2, y1 + 2, x1 + progressPixels, y2 - 2, color)
+
+		val alphaBits = (alpha * 255.999).toInt() shl 24
+		val colorBarBorder = alphaBits or SplashConfig.colorBarBorder
+		val colorBarBg = alphaBits or SplashConfig.colorBarBg
+		val colorBarFg = alphaBits or SplashConfig.colorBarFg
+
+		fill(matrices, x1 + 1, y1, x2 - 1, y1 + 1, colorBarBorder)
+		fill(matrices, x1 + 1, y2, x2 - 1, y2 - 1, colorBarBorder)
+		fill(matrices, x1, y1, x1 + 1, y2, colorBarBorder)
+		fill(matrices, x2, y1, x2 - 1, y2, colorBarBorder)
+
+		fill(matrices, x1 + 1, y1 + 1, x2 - 1, y2 - 1, colorBarBg)
+		fill(matrices, x1 + 2, y1 + 2, x1 + progressPixels, y2 - 2, colorBarFg)
 	}
 
 	override fun onClose() {
 		if (applying) {
 			SplashConfig.save()
 		} else {
-			SplashConfig.fgColor = fgStart
-			SplashConfig.bgColor = bgStart
+			SplashConfig.colorBackground = colorBackgroundStart
+			SplashConfig.colorLogo = colorLogoStart
+			SplashConfig.colorBarBorder = colorBarBorderStart
+			SplashConfig.colorBarBg = colorBarBgStart
+			SplashConfig.colorBarFg = colorBarFgStart
 		}
 
 		client!!.openScreen(parent)

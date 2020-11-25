@@ -10,31 +10,37 @@ object SplashConfig {
 		File(MinecraftClient.getInstance().runDirectory, "config")
 	private val configFile = File(configDir, "splash.cfg")
 
-	const val defaultFg = 0xEF323D
 	const val defaultBg = 0x171414
+	const val defaultFg = 0xEF323D
 
-	var fgColor = defaultFg
-	var bgColor = defaultBg
+	private var config = ""
 
-	val bgColorArgb get() = bgColor or 0xFF000000.toInt()
+	var colorBackground = defaultBg
+	var colorLogo = defaultFg
+
+	var colorBarBorder = defaultFg
+	var colorBarBg = defaultBg
+	var colorBarFg = defaultFg
+
+	val colorBackgroundArgb get() = colorBackground or 0xFF000000.toInt()
 
 	@Suppress("SameParameterValue")
-	private fun read(file: File): HashMap<String, String> {
+	private fun read(config: String): HashMap<String, String> {
 		val map = HashMap<String, String>()
 
-		file.forEachLine {
+		config.lines().forEach {
 			val trimmed = it.trim()
 
-			if (trimmed.startsWith('#')) return@forEachLine
+			if (trimmed.startsWith('#')) return@forEach
 
 			if (!trimmed.contains('=')) {
 				if (trimmed.isNotEmpty())
 					LOGGER.warn("Skipping malformed config line: %s", trimmed)
 
-				return@forEachLine
+				return@forEach
 			}
 
-			val (key, value) = it.split('=', limit = 2).map(String::trim)
+			val (key, value) = trimmed.split('=', limit = 2).map(String::trim)
 
 			if (map.containsKey(key))
 				LOGGER.warn("Ignoring duplicate declaration: %s", trimmed)
@@ -45,32 +51,40 @@ object SplashConfig {
 		return map
 	}
 
+	private fun trailingNewlineFix(lines: List<String>): List<String> {
+		if (lines.last().isEmpty()) {
+			return lines.dropLast(1)
+		}
+
+		return lines
+	}
+
 	@Suppress("SameParameterValue")
-	private fun apply(file: File, changes: LinkedHashMap<String, String>) {
+	private fun apply(config: String, changes: LinkedHashMap<String, String>): String {
 		val seen = HashSet<String>()
 		val sb = StringBuilder()
 
 		// attempt to reuse existing lines
-		file.forEachLine {
+		trailingNewlineFix(config.lines()).forEach {
 			val trimmed = it.trim()
 
 			if (trimmed.startsWith('#')) {
 				sb.appendln(trimmed)
 
-				return@forEachLine
+				return@forEach
 			}
 
 			if (!trimmed.contains('=')) {
 				if (trimmed.isEmpty())
 					sb.appendln()
 
-				return@forEachLine
+				return@forEach
 			}
 
-			val (key, value) = it.split('=', limit = 2).map(String::trim)
+			val (key, value) = trimmed.split('=', limit = 2).map(String::trim)
 
 			if (!seen.add(key))
-				return@forEachLine
+				return@forEach
 
 			sb.appendln(key + "=" + changes.getOrDefault(key, value))
 		}
@@ -82,7 +96,7 @@ object SplashConfig {
 			}
 		}
 
-		file.writeText(sb.toString())
+		return sb.toString()
 	}
 
 	private fun parseHex(hex: String): Int? {
@@ -102,10 +116,13 @@ object SplashConfig {
 	private fun resetConfig() {
 		val sb = StringBuilder()
 		sb.appendln("# Edit the hex values below to change the color scheme")
-		sb.appendln("# Lines starting with # are ignored, and may even be used to store alternative color schemes")
+		sb.appendln("# Lines starting with # are ignored, and may be used to store alternative color schemes")
 		sb.appendln()
-		sb.appendln("fgColor=" + encodeHex(defaultFg))
-		sb.appendln("bgColor=" + encodeHex(defaultBg))
+		sb.appendln("bg=" + encodeHex(defaultBg))
+		sb.appendln("logo=" + encodeHex(defaultFg))
+		sb.appendln("barBorder=" + encodeHex(defaultFg))
+		sb.appendln("barBg=" + encodeHex(defaultBg))
+		sb.appendln("barFg=" + encodeHex(defaultFg))
 		configFile.writeText(sb.toString())
 	}
 
@@ -114,6 +131,7 @@ object SplashConfig {
 
 		if (configFile.createNewFile()) {
 			resetConfig()
+			config = configFile.readText()
 		}
 	}
 
@@ -121,25 +139,62 @@ object SplashConfig {
 		makeSureConfigExists()
 
 		val changes = linkedMapOf(
-			"fgColor" to encodeHex(fgColor),
-			"bgColor" to encodeHex(bgColor)
+			"bg" to encodeHex(colorBackground),
+			"logo" to encodeHex(colorLogo),
+			"barBorder" to encodeHex(colorBarBorder),
+			"barBg" to encodeHex(colorBarBg),
+			"barFg" to encodeHex(colorBarFg)
 		)
+		config = apply(config, changes)
+		configFile.writeText(config)
+	}
 
-		apply(configFile, changes)
+	private fun preprocess(config: String): String {
+		val sb = StringBuilder()
+
+		trailingNewlineFix(config.lines()).forEach {
+			val trimmed = it.trim()
+
+			if (trimmed.startsWith('#') || !trimmed.contains('=')) {
+				sb.appendln(it)
+				return@forEach
+			}
+
+			var (key, value) = trimmed.split('=', limit = 2).map(String::trim)
+
+			// migrate old names
+			if (key == "fgColor") {
+				key = "logo"
+			} else if (key == "bgColor") {
+				key = "bg"
+			}
+
+			sb.appendln("$key=$value")
+		}
+
+		return sb.toString()
 	}
 
 	fun load() {
 		makeSureConfigExists()
 
-		val map = read(configFile)
+		config = preprocess(configFile.readText())
+
+		val map = read(config)
+
+		fun parseHexOrWarn(something: String): Int? {
+			return parseHex(something)
+			       ?: LOGGER.warn("Invalid hex color code: %s", something).let { null }
+		}
 
 		map.entries.forEach { decl ->
 			when (decl.key) {
-				"fgColor" -> parseHex(decl.value)?.also { fgColor = it }
-				             ?: LOGGER.warn("Invalid hex color code: %s", decl.value)
-				"bgColor" -> parseHex(decl.value)?.also { bgColor = it }
-				             ?: LOGGER.warn("Invalid hex color code: %s", decl.value)
-				else      -> LOGGER.warn("Invalid variable: %s", decl.key)
+				"bg"        -> parseHexOrWarn(decl.value)?.also { colorBackground = it }
+				"logo"      -> parseHexOrWarn(decl.value)?.also { colorLogo = it }
+				"barBorder" -> parseHexOrWarn(decl.value)?.also { colorBarBorder = it }
+				"barBg"     -> parseHexOrWarn(decl.value)?.also { colorBarBg = it }
+				"barFg"     -> parseHexOrWarn(decl.value)?.also { colorBarFg = it }
+				else        -> LOGGER.warn("Unknown variable name: %s", decl.key)
 			}
 		}
 	}

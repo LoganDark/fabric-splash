@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.logandark.splash.Splash;
 import net.logandark.splash.SplashConfig;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.SplashScreen;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -35,7 +37,15 @@ public abstract class MixinSplashScreen {
 	private static int field_25042; // bgRgb
 
 	@Unique
-	private static int fgRgb;
+	private static int colorLogoRgb;
+	@Unique
+	private static int colorBarBorderRgb;
+	@Unique
+	private static int colorBarBgRgb;
+	@Unique
+	private static int colorBarFgRgb;
+	@Unique
+	private static int alpha;
 
 	@Unique
 	private static int prevWrapS;
@@ -45,9 +55,12 @@ public abstract class MixinSplashScreen {
 		at = @At("HEAD")
 	)
 	private void splash_onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		field_25042 = SplashConfig.INSTANCE.getBgColor(); // bgRgb
+		field_25042 = SplashConfig.INSTANCE.getColorBackground(); // bgRgb
 		field_25041 = field_25042 | 0xFF000000; // bgArgb
-		fgRgb = SplashConfig.INSTANCE.getFgColor();
+		colorLogoRgb = SplashConfig.INSTANCE.getColorLogo();
+		colorBarBorderRgb = SplashConfig.INSTANCE.getColorBarBorder();
+		colorBarBgRgb = SplashConfig.INSTANCE.getColorBarBg();
+		colorBarFgRgb = SplashConfig.INSTANCE.getColorBarFg();
 	}
 
 	@Redirect(
@@ -80,9 +93,9 @@ public abstract class MixinSplashScreen {
 	)
 	private void splash_onRender(float ir, float ig, float ib, float alpha) {
 		RenderSystem.blendColor(
-			((fgRgb >> 16) & 0xFF) / 255F * alpha,
-			((fgRgb >> 8) & 0xFF) / 255F * alpha,
-			(fgRgb & 0xFF) / 255F * alpha,
+			((colorLogoRgb >> 16) & 0xFF) / 255F * alpha,
+			((colorLogoRgb >> 8) & 0xFF) / 255F * alpha,
+			(colorLogoRgb & 0xFF) / 255F * alpha,
 			alpha
 		);
 
@@ -110,6 +123,21 @@ public abstract class MixinSplashScreen {
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, prevWrapS);
 	}
 
+	/**
+	 * Used to draw the background color underneath the progress bar
+	 */
+	@Inject(
+		method = "renderProgressBar",
+		at = @At("HEAD")
+	)
+	private void splash_onBeforeDrawBarBorder(MatrixStack matrices, int x1, int y1, int x2, int y2, float a, CallbackInfo ci) {
+		alpha = Math.round(a * 255.0F) << 24;
+		DrawableHelper.fill(matrices, x1 + 1, y1 + 1, x2 - 1, y2 - 1, alpha | colorBarBgRgb);
+	}
+
+	/**
+	 * Used to change the color of the progress bar border
+	 */
 	@Redirect(
 		method = "renderProgressBar",
 		at = @At(
@@ -117,7 +145,23 @@ public abstract class MixinSplashScreen {
 			target = "Lnet/minecraft/client/gui/hud/BackgroundHelper$ColorMixer;getArgb(IIII)I"
 		)
 	)
-	private int splash_onGetArgb(int a, int r, int g, int b) {
-		return (a << 24) | fgRgb;
+	private int splash_onGetBarBorderArgb(int a, int r, int g, int b) {
+		return alpha | colorBarBorderRgb;
+	}
+
+	/**
+	 * Used to change the color of the progress bar itself
+	 */
+	@ModifyArg(
+		method = "renderProgressBar",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/gui/screen/SplashScreen;fill(Lnet/minecraft/client/util/math/MatrixStack;IIIII)V",
+			ordinal = 4
+		),
+		index = 5
+	)
+	private int splash_getBarFgArgb(int _unused) {
+		return alpha | colorBarFgRgb;
 	}
 }

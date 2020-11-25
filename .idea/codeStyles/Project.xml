@@ -96,6 +96,7 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="Groovy">
+      <option name="RIGHT_MARGIN" value="120" />
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
         <option name="USE_TAB_CHARACTER" value="true" />
