@@ -29,12 +29,12 @@ import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 @Mixin(SplashScreen.class)
 public abstract class MixinSplashScreen {
 	@SuppressWarnings("ShadowModifiers")
-	@Shadow(remap = false)
-	private static int field_25041; // bgArgb
+	@Shadow
+	private static int BRAND_ARGB;
 
 	@SuppressWarnings("ShadowModifiers")
-	@Shadow(remap = false)
-	private static int field_25042; // bgRgb
+	@Shadow
+	private static int BRAND_RGB;
 
 	@Unique
 	private static int colorLogoRgb;
@@ -55,8 +55,8 @@ public abstract class MixinSplashScreen {
 		at = @At("HEAD")
 	)
 	private void splash_onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		field_25042 = SplashConfig.INSTANCE.getColorBackground(); // bgRgb
-		field_25041 = field_25042 | 0xFF000000; // bgArgb
+		BRAND_RGB = SplashConfig.INSTANCE.getColorBackground(); // bgRgb
+		BRAND_ARGB = BRAND_RGB | 0xFF000000; // bgArgb
 		colorLogoRgb = SplashConfig.INSTANCE.getColorLogo();
 		colorBarBorderRgb = SplashConfig.INSTANCE.getColorBarBorder();
 		colorBarBgRgb = SplashConfig.INSTANCE.getColorBarBg();
