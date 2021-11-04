@@ -12,14 +12,12 @@
 		"issues": "https://github.com/LoganDark/fabric-splash/issues"
 	},
 
-	"custom": {
-		"modmenu:clientsideOnly": true
-	},
+	"custom": {},
 
 	"license": "GPLv3",
 	"icon": "assets/splash/icon.png",
 
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
 		"client": [
 			{
