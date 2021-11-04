@@ -5,11 +5,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.logandark.splash.Splash;
 import net.logandark.splash.SplashConfig;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.SplashScreen;
-import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.gui.screen.SplashOverlay;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.IntSupplier;
+
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
@@ -26,16 +29,14 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 
-@Mixin(SplashScreen.class)
-public abstract class MixinSplashScreen {
-	@SuppressWarnings("ShadowModifiers")
+@Mixin(SplashOverlay.class)
+public abstract class MixinSplashOverlay {
+	@Final
 	@Shadow
-	private static int BRAND_ARGB;
+	private static IntSupplier BRAND_ARGB;
 
-	@SuppressWarnings("ShadowModifiers")
-	@Shadow
-	private static int BRAND_RGB;
-
+	@Unique
+	private static int colorBgRgb;
 	@Unique
 	private static int colorLogoRgb;
 	@Unique
@@ -55,8 +56,7 @@ public abstract class MixinSplashScreen {
 		at = @At("HEAD")
 	)
 	private void splash_onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		BRAND_RGB = SplashConfig.INSTANCE.getColorBackground(); // bgRgb
-		BRAND_ARGB = BRAND_RGB | 0xFF000000; // bgArgb
+		colorBgRgb = SplashConfig.INSTANCE.getColorBackground();
 		colorLogoRgb = SplashConfig.INSTANCE.getColorLogo();
 		colorBarBorderRgb = SplashConfig.INSTANCE.getColorBarBorder();
 		colorBarBgRgb = SplashConfig.INSTANCE.getColorBarBg();
@@ -67,12 +67,27 @@ public abstract class MixinSplashScreen {
 		method = "render",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/texture/TextureManager;bindTexture(Lnet/minecraft/util/Identifier;)V"
+			target = "Ljava/util/function/IntSupplier;getAsInt()I"
 		)
 	)
-	private void splash_bindTexture(TextureManager textureManager, Identifier id) {
+	private int splash_onGetAsInt(IntSupplier instance) {
+		if (instance == BRAND_ARGB) {
+			return colorBgRgb;
+		}
+
+		return instance.getAsInt();
+	}
+
+	@Redirect(
+		method = "render",
+		at = @At(
+			value = "INVOKE",
+			target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V"
+		)
+	)
+	private void splash_bindTexture(int i, Identifier identifier) {
 		// switch to premultiplied logo
-		Splash.INSTANCE.bindLogoImage();
+		Splash.INSTANCE.bindLogoTexture();
 
 		// bilinear scaling
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -88,11 +103,11 @@ public abstract class MixinSplashScreen {
 		method = "render",
 		at = @At(
 			value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/systems/RenderSystem;color4f(FFFF)V"
+			target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"
 		)
 	)
 	private void splash_onRender(float ir, float ig, float ib, float alpha) {
-		RenderSystem.blendColor(
+		GL14.glBlendColor(
 			((colorLogoRgb >> 16) & 0xFF) / 255F * alpha,
 			((colorLogoRgb >> 8) & 0xFF) / 255F * alpha,
 			(colorLogoRgb & 0xFF) / 255F * alpha,
@@ -106,8 +121,7 @@ public abstract class MixinSplashScreen {
 			GlStateManager.DstFactor.ONE
 		);
 
-		//noinspection deprecation
-		RenderSystem.color4f(1f, 1f, 1f, alpha);
+		RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
 	}
 
 	@Inject(
@@ -156,7 +170,7 @@ public abstract class MixinSplashScreen {
 		method = "renderProgressBar",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/screen/SplashScreen;fill(Lnet/minecraft/client/util/math/MatrixStack;IIIII)V",
+			target = "Lnet/minecraft/client/gui/screen/SplashOverlay;fill(Lnet/minecraft/client/util/math/MatrixStack;IIIII)V",
 			ordinal = 4
 		),
 		index = 5

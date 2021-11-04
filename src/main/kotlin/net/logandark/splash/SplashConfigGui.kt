@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER
 import org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER
 import org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S
 import org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE
+import org.lwjgl.opengl.GL14
 import kotlin.math.min
 
 class SplashConfigGui(
@@ -106,11 +107,11 @@ class SplashConfigGui(
 		else
 			fieldBarFg.setValue(SplashConfig.colorBarFg)
 
-		addButton(fieldLogo)
-		addButton(fieldBackground)
-		addButton(fieldBarBorder)
-		addButton(fieldBarBg)
-		addButton(fieldBarFg)
+		addDrawableChild(fieldLogo)
+		addDrawableChild(fieldBackground)
+		addDrawableChild(fieldBarBorder)
+		addDrawableChild(fieldBarBg)
+		addDrawableChild(fieldBarFg)
 
 		val presets = listOf<Pair<Text, Pair<Int, Int>>>(
 			TranslatableText("splash.configuration.preset.default") to (SplashConfig.defaultFg to SplashConfig.defaultBg),
@@ -120,7 +121,7 @@ class SplashConfigGui(
 		for (i in 0 until presets.size) {
 			val (key, values) = presets[i]
 
-			addButton(ButtonWidget(
+			addDrawableChild(ButtonWidget(
 				padding, padding + (20 + padding) * (i + 1), fieldWidth, 20, key,
 				ButtonWidget.PressAction {
 					fieldLogo.setValue(values.first)
@@ -132,7 +133,7 @@ class SplashConfigGui(
 			))
 		}
 
-		addButton(ButtonWidget(
+		addDrawableChild(ButtonWidget(
 			halfWidth - halfPadding - buttonWidth, height - 20 - padding, buttonWidth, 20,
 			TranslatableText("splash.configuration.cancel"),
 			ButtonWidget.PressAction {
@@ -140,7 +141,7 @@ class SplashConfigGui(
 			}
 		))
 
-		addButton(ButtonWidget(
+		addDrawableChild(ButtonWidget(
 			halfWidth + halfPadding, height - 20 - padding, buttonWidth, 20,
 			TranslatableText("splash.configuration.save"),
 			ButtonWidget.PressAction {
@@ -197,7 +198,7 @@ class SplashConfigGui(
 		val green = (fg shr 8 and 0xFF).toFloat() / 255
 		val blue = (fg and 0xFF).toFloat() / 255
 
-		Splash.bindLogoImage()
+		Splash.bindLogoTexture()
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
@@ -205,19 +206,19 @@ class SplashConfigGui(
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
 
 		RenderSystem.enableBlend()
-		RenderSystem.blendColor(red, green, blue, 1F)
+		GL14.glBlendColor(red, green, blue, 1F)
 		RenderSystem.blendFuncSeparate(
 			GlStateManager.SrcFactor.CONSTANT_COLOR,
 			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
 			GlStateManager.SrcFactor.ZERO,
 			GlStateManager.DstFactor.ONE
 		)
-		RenderSystem.alphaFunc(GL_GREATER, 0.0f)
-		RenderSystem.color4f(1F, 1F, 1F, 1F)
+		//RenderSystem.alphaFunc(GL_GREATER, 0.0f)
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F)
 		drawTexture(matrices, xCenter - hsizeX, yCenter - hsizeY, hsizeX, sizeY, -0.0625f, 0.0f, 120, 60, 120, 120)
 		drawTexture(matrices, xCenter, yCenter - hsizeY, hsizeX, sizeY, 0.0625f, 60.0f, 120, 60, 120, 120)
 		RenderSystem.defaultBlendFunc()
-		RenderSystem.defaultAlphaFunc()
+		//RenderSystem.defaultAlphaFunc()
 		RenderSystem.disableBlend()
 
 		RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, prevWrapS)
@@ -264,7 +265,7 @@ class SplashConfigGui(
 			SplashConfig.colorBarFg = colorBarFgStart
 		}
 
-		client!!.openScreen(parent)
+		client!!.setScreen(parent)
 	}
 
 	override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {

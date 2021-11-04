@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Mixin(targets = "net/minecraft/client/gui/screen/SplashScreen$LogoTexture")
+@Mixin(targets = "net/minecraft/client/gui/screen/SplashOverlay$LogoTexture")
 public abstract class MixinLogoTexture extends ResourceTexture {
 	public MixinLogoTexture(Identifier location) {
 		super(location);
@@ -21,9 +21,8 @@ public abstract class MixinLogoTexture extends ResourceTexture {
 	 * Set up a copy of the logo image with premultiplied alpha so we can draw
 	 * that instead of the official texture (fixes the darkened edges)
 	 */
-	@SuppressWarnings("UnnecessaryQualifiedMemberReference")
 	@Redirect(
-		method = "Lnet/minecraft/client/gui/screen/SplashScreen$LogoTexture;loadTextureData(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/texture/ResourceTexture$TextureData;",
+		method = "loadTextureData",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/texture/NativeImage;read(Ljava/io/InputStream;)Lnet/minecraft/client/texture/NativeImage;",
@@ -46,18 +45,18 @@ public abstract class MixinLogoTexture extends ResourceTexture {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				int color = image.getPixelColor(x, y);
+				int color = image.getColor(x, y);
 				int alpha = color >> 24 & 0xFF;
 
 				// fix regular logo texture (not premultiplied)
 				//image.setPixelColor(x, y, color | 0xFFFFFF);
 
 				// premultiply for our custom logo texture
-				premultiplied.setPixelColor(x, y, alpha << 24 | alpha << 16 | alpha << 8 | alpha);
+				premultiplied.setColor(x, y, alpha << 24 | alpha << 16 | alpha << 8 | alpha);
 			}
 		}
 
-		Splash.INSTANCE.setupLogoImage(premultiplied);
+		Splash.INSTANCE.setupLogoTexture(premultiplied);
 
 		return image;
 	}
